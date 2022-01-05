@@ -2,7 +2,9 @@ package com.company;
 
 import java.io.*;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Stack;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,10 +16,16 @@ public class Main {
             System.out.println("Good program");
             Stack<Pair<String, CounterMachine>> result = Emulator.Make(a);
             for(var resultPair : result){
-                //resultPair.second.getInfo();
                 CounterMachine.libs.put(resultPair.first, resultPair.second);
             }
-            Map<String, Integer> programResult = CounterMachine.libs.get("main").startLikeMain();
+
+            Map<String, Integer> programArgs = new TreeMap<>();
+            Scanner in = new Scanner(System.in);
+            while(in.hasNext()){
+                programArgs.put(in.next(), in.nextInt());
+            }
+
+            Map<String, Integer> programResult = CounterMachine.libs.get("main").startLikeMain(programArgs);
             for(var programPair : programResult.entrySet()){
                 System.out.println(programPair.getKey() + " " + programPair.getValue());
             }

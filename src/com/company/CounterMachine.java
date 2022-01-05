@@ -109,22 +109,28 @@ public class CounterMachine {
                 localCounters.add(counters.get(nextCommand.counters.get(i)));
             }
             var resultPair = libs.get(nextCommand.command).startMachine(nextCommand.counters, localCounters, nextCommand.endLabels);
-            currentLabel = resultPair.first;
+            currentLabel = nextCommand.endLabels.get(resultPair.first);
             counters.putAll(resultPair.second);
         }
         return true;
     }
 
-    public Map<String, Integer> startLikeMain(){
+    public Map<String, Integer> startLikeMain(Map<String, Integer> args){
         currentLabel = startLabel;
-        this.counters = new TreeMap<>();
+
+        if(args != null) {
+            this.counters = args;
+        }
+        else{
+            this.counters = new TreeMap<>();
+        }
         while(DoWork());
 
         return counters;
     }
 
     // returns end label and map of new counters values.
-    public Pair<String, Map<String, Integer>> startMachine(ArrayList<String> namesCountersQueue, ArrayList<Integer> argsCountersQueue, ArrayList<String> endLabels) {
+    public Pair<Integer, Map<String, Integer>> startMachine(ArrayList<String> namesCountersQueue, ArrayList<Integer> argsCountersQueue, ArrayList<String> endLabels) {
         this.counters = new TreeMap<>();
         for(int i = 0; i < countersQueue.size(); i++){
             if(argsCountersQueue.get(i) != null) {
@@ -140,12 +146,12 @@ public class CounterMachine {
 
         Map<String, Integer> newCounters = new TreeMap<>(); // replace inside counters to outside counters
         for(int i = 0; i < namesCountersQueue.size(); i++){
-            newCounters.put(namesCountersQueue.get(0), counters.get(countersQueue.get(i)));
+            newCounters.put(namesCountersQueue.get(i), counters.get(countersQueue.get(i)));
         }
 
         for(int i = 0; i < labelsQueue.size(); i++){
-            if(currentLabel.equals(labelsQueue.get(0))){
-                return new Pair<>(currentLabel, newCounters); // get all needed info form this counters on other side
+            if(currentLabel.equals(labelsQueue.get(i))){
+                return new Pair<>(i, newCounters); // get all needed info form this counters on other side
             }
         }
         throw new RuntimeException("This exit state is not exists");

@@ -2,8 +2,20 @@
 S -> dec(N) S : E;
 }
 
-#main(1)(){
-1 -> inc(1) 2;
-2 -> inc(1) 3;
-3 -> zero(1) 4;
+#move(S)(a:b) E{
+S -> zero(a) Q;
+Q -> dec(b) I : E;
+I -> inc(a) Q;
+}
+
+#copy(S)(1:2) E{
+S -> zero(1) q0;
+q0 -> dec(2) q1 : q2;
+q1 -> inc(1) q3;
+q3 -> inc(3) q0;
+q2 -> move(2:3) E;
+}
+
+#main(S)(){
+S -> copy(1:2) E;
 }
