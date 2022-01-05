@@ -1,0 +1,12 @@
+#MyFunc1(q)() b : p : q {
+q -> inc(a) b;
+b -> dec(a) b : q;
+}
+#MyFunc2(r)(1:2:3) b{
+q -> inc(a) b;
+b -> MyFunc1() q : c : d;
+}
+#main(q)(){
+q -> MyFunc1() b : b : b;
+b -> MyFunc2(a:b:c) b;
+}
