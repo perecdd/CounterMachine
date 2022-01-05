@@ -17,14 +17,14 @@ public class Emulator {
     static private Integer listenIndex = 0;
     static private ArrayList<Token> tokens;
 
-    static private Stack<CounterMachine> machines = null;
+    static private Stack<Pair<String, CounterMachine>> machines = null;
     static private ArrayList<String> countersInMachine = null;
     static private ArrayList<String> endStatesInMachine = null;
 
     static private ArrayList<String> countersForCommand = null;
     static private ArrayList<String> endLabelsForCommand = null;
 
-    public static Stack<CounterMachine> Make(ArrayList<Token> tokenArrayList) throws IOException {
+    public static Stack<Pair<String, CounterMachine>> Make(ArrayList<Token> tokenArrayList) throws IOException {
         listenIndex = 0;
         FunctionEndsCount = new TreeMap<>();
         FunctionArgumentCount = new TreeMap<>();
@@ -74,7 +74,7 @@ public class Emulator {
         if(tokens.get(listenIndex++).getLexem() != Lexem.rpar) return false;
         if(!functionName.equals("main") && !EndStates(functionName)) return false;
 
-        machines.push(new CounterMachine(startLabel, countersInMachine, endStatesInMachine));
+        machines.push(new Pair<>(functionName, new CounterMachine(startLabel, countersInMachine, endStatesInMachine)));
         return true;
     }
 
@@ -162,7 +162,7 @@ public class Emulator {
                 if(!EndStatesCommand(id)) return false;
             }
             else return false;
-            machines.peek().addCommand(new Command(startLabel, command, countersForCommand, endLabelsForCommand));
+            machines.peek().second.addCommand(new Command(startLabel, command, countersForCommand, endLabelsForCommand));
             return true;
         }
         return false;

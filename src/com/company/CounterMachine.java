@@ -1,5 +1,6 @@
 package com.company;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -29,6 +30,8 @@ class Pair<T, V>{
 }
 
 public class CounterMachine {
+    static public Map<String, CounterMachine> libs = new TreeMap<>();
+
     private String startLabel = null;
     private String currentLabel = null;
     private Map<String, Command> commands = null;
@@ -36,6 +39,10 @@ public class CounterMachine {
     private ArrayList<String> labelsQueue = null;
     private ArrayList<String> countersQueue = null;
     private Map<String, Integer> counters = null;
+
+    public void addLib(String name, CounterMachine counterMachine){
+        libs.put(name, counterMachine);
+    }
 
     // initialize new counter machine
     public CounterMachine(String startLabel, ArrayList<String> countersQueue, ArrayList<String> labelsQueue){
@@ -74,12 +81,73 @@ public class CounterMachine {
         commands.put(command.startLabel, command);
     }
 
+    boolean DoWork(){
+        Command nextCommand = commands.get(currentLabel);
+        if(nextCommand == null) return false;
+
+        if(nextCommand.command.equals("inc")){
+            String counterName = nextCommand.counters.get(0);
+            Integer value = counters.getOrDefault(counterName, 0);
+            counters.put(counterName, value + 1);
+            currentLabel = nextCommand.endLabels.get(0);
+        }
+        else if(nextCommand.command.equals("dec")){
+            String counterName = nextCommand.counters.get(0);
+            Integer value = counters.getOrDefault(counterName, 0);
+
+            if(value > 0) {
+                counters.put(counterName, value - 1);
+                currentLabel = nextCommand.endLabels.get(0);
+            }
+            else{
+                currentLabel = nextCommand.endLabels.get(1);
+            }
+        }
+        else{
+            ArrayList<Integer> localCounters = new ArrayList<>();
+            for(int i = 0; i < nextCommand.counters.size(); i++){
+                localCounters.add(counters.get(nextCommand.counters.get(i)));
+            }
+            var resultPair = libs.get(nextCommand.command).startMachine(nextCommand.counters, localCounters, nextCommand.endLabels);
+            currentLabel = resultPair.first;
+            counters.putAll(resultPair.second);
+        }
+        return true;
+    }
+
+    public Map<String, Integer> startLikeMain(){
+        currentLabel = startLabel;
+        this.counters = new TreeMap<>();
+        while(DoWork());
+
+        return counters;
+    }
+
     // returns end label and map of new counters values.
-    public Pair<String, Map<String, Integer>> startMachine(ArrayList<Integer> argsCountersQueue, ArrayList<String> endLabels) {
+    public Pair<String, Map<String, Integer>> startMachine(ArrayList<String> namesCountersQueue, ArrayList<Integer> argsCountersQueue, ArrayList<String> endLabels) {
+        this.counters = new TreeMap<>();
         for(int i = 0; i < countersQueue.size(); i++){
-            counters.put(countersQueue.get(i), argsCountersQueue.get(i));
+            if(argsCountersQueue.get(i) != null) {
+                counters.put(countersQueue.get(i), argsCountersQueue.get(i));
+            }
+            else{
+                counters.put(countersQueue.get(i), 0);
+            }
         } // insert start counters
-        // DO SOME WORK
-        return new Pair<>(new String(), counters); // get all needed info form this counters on other side
+
+        currentLabel = startLabel;
+        while(DoWork());
+
+        Map<String, Integer> newCounters = new TreeMap<>(); // replace inside counters to outside counters
+        for(int i = 0; i < namesCountersQueue.size(); i++){
+            newCounters.put(namesCountersQueue.get(0), counters.get(countersQueue.get(i)));
+        }
+
+        for(int i = 0; i < labelsQueue.size(); i++){
+            if(currentLabel.equals(labelsQueue.get(0))){
+                return new Pair<>(currentLabel, newCounters); // get all needed info form this counters on other side
+            }
+        }
+        throw new RuntimeException("This exit state is not exists");
     }
 }
