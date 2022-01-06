@@ -1,0 +1,6 @@
+$ops.txt % main operations
+$math.txt % math library
+
+#main(S)(){
+S -> sum(1:2) E;
+}

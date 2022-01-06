@@ -1,13 +1,20 @@
 package com.company;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LexAnalyzer {
-    static public ArrayList<Token> AnalyzeLine(String line) throws IOException {
+    /**
+     * @param line - string of program
+     * @return Array of tokens, which contains language lexemes
+     */
+    static public ArrayList<Token> AnalyzeLine(String line) {
         ArrayList<Token> tokens = new ArrayList<>();
         Pattern pattern = Pattern.compile("[a-zA-Z0-9]+|(->)|((dec)|(inc))|:|[(]|[)]|;|#|[{]|[}]");
         Matcher matcher = pattern.matcher(line);
@@ -30,10 +37,34 @@ public class LexAnalyzer {
         return tokens;
     }
 
+    /**
+     * @param stream - buffered reader, which needed to read program code to transform it to tokens.
+     * @return Array of tokens, which contains lexemes of program
+     * @throws IOException If an I/O error occurs
+     */
     static public ArrayList<Token> Analyze(BufferedReader stream) throws IOException {
         ArrayList<Token> tokens = new ArrayList<>();
+        Set<String> libs = new TreeSet<>();
+
         while(stream.ready()) {
-            tokens.addAll(AnalyzeLine(stream.readLine()));
+            String line = stream.readLine();
+            if(line == null) break;
+
+            if(line.contains("%")){
+                line = line.substring(0, line.indexOf('%'));
+            }
+
+            if(!line.contains("$")) {
+                tokens.addAll(AnalyzeLine(line));
+            }
+            else {
+                String libName = line.split("[$]")[1];
+                if(!libs.contains(libName)) {
+                    libs.add(libName);
+                    BufferedReader br = new BufferedReader(new FileReader(libName));
+                    tokens.addAll(LexAnalyzer.Analyze(br));
+                }
+            }
         }
         return tokens;
     }

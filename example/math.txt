@@ -1,0 +1,7 @@
+$ops.txt
+
+#sum(q0)(1:2) qE{
+q0 -> copy(3:2) q1;
+q1 -> dec(3) q2 : qE;
+q2 -> inc(1) q1;
+}

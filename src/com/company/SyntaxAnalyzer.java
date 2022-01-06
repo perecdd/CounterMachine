@@ -45,6 +45,7 @@ public class SyntaxAnalyzer {
     private static boolean F(){
         if(listenIndex >= tokens.size()) return false;
         String functionName = tokens.get(listenIndex).getString();
+        if(FunctionEndsCount.containsKey(functionName)) return false;
         FunctionEndsCount.put(functionName, 0);
         if(tokens.get(listenIndex++).getLexem() != Lexem.id) return false;
         if(tokens.get(listenIndex++).getLexem() != Lexem.lpar) return false;
@@ -129,6 +130,7 @@ public class SyntaxAnalyzer {
 
     private static boolean IDCommand(String id){
         Integer count = FunctionArgumentCount.get(id);
+        if(count == null) return false; // case when function don't exist
         while(count > 0){
             if(tokens.get(listenIndex++).getLexem() != Lexem.id) return false;
             if(count - 1 != 0 && tokens.get(listenIndex++).getLexem() != Lexem.colon) return false;
@@ -139,6 +141,7 @@ public class SyntaxAnalyzer {
 
     private static boolean EndStatesCommand(String id){
         Integer count = FunctionEndsCount.get(id);
+        if(count == null) return false; // case when function don't exist
         if(tokens.get(listenIndex).getLexem() != Lexem.id) return false;
         while(count > 0){
             if(tokens.get(listenIndex++).getLexem() != Lexem.id) return false;

@@ -5,12 +5,10 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("program.txt"));
+        BufferedReader br = new BufferedReader(new FileReader("main.txt"));
         var a = LexAnalyzer.Analyze(br);
         if(SyntaxAnalyzer.Analyze(a)){
             System.out.println("Good program");

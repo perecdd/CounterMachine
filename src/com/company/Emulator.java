@@ -62,6 +62,7 @@ public class Emulator {
 
         if(listenIndex >= tokens.size()) return false;
         functionName = tokens.get(listenIndex).getString();
+        if(FunctionEndsCount.containsKey(functionName)) return false;
         FunctionEndsCount.put(functionName, 0);
         if(tokens.get(listenIndex++).getLexem() != Lexem.id) return false;
         if(tokens.get(listenIndex++).getLexem() != Lexem.lpar) return false;
